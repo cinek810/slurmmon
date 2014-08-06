@@ -20,6 +20,10 @@ function graph_slurm_probejob_pendtime ( &$rrdtool_graph ) {
         {
                 $series =  $series."LINE2:'".$partition."'".$colours[$i].":'".$partition."' ";
                 $i++;
+		if(count($colours)<=$i)
+		{
+			i=0;
+		}
                                 
         }
 
