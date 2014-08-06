@@ -114,13 +114,13 @@ def write_report(output_dir, completed_jobs_cpu=True, live_nodes_cpu=True):
 	
 		#entries
 	
+		#Generate images with script
 		import Image
 		import ImageFont
 		import ImageDraw
 
 		for j in jobs_cpu_wasters:
 			html += '<tr>'
-			#for i, x in enumerate((j['User'], j['JobID'], int(round(j['CPU_Wasted']/(60*60*24))), '%d%%' % int(round(j['CPU_Efficiency']*100)), j['NCPUS'], config.syntax_highlight(j['JobScript']))):
 			for i, x in enumerate((j['User'], j['JobID'], int(round(j['CPU_Wasted']/(60*60*24))), '%d%%' % int(round(j['CPU_Efficiency']*100)), j['NCPUS'], j['JobID'])):
 				if i==1:
 					html += '<td><a href="jobs/%s.html">%s</a></td>' % (x, x)
@@ -159,7 +159,6 @@ def write_report(output_dir, completed_jobs_cpu=True, live_nodes_cpu=True):
 		
 		#wrap-up
 		html += '</table>'
-		#Generate images with script
 
 
 
@@ -220,8 +219,6 @@ def write_report(output_dir, completed_jobs_cpu=True, live_nodes_cpu=True):
 	
 	with open(os.path.join(output_dir,page_filename),'w') as f:
 		f.write(html)
-
-	print os.path.join(output_dir,page_filename)
 
 
 if __name__=='__main__':
