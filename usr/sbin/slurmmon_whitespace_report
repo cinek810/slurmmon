@@ -57,7 +57,7 @@ def write_report(output_dir, completed_jobs_cpu=True, live_nodes_cpu=True):
 	range = datetime.timedelta(days=1)
 
 	#the amount of entries to include in tables
-	limit = 15
+	limit = 20
 
 	state = 'COMPLETED'
 
@@ -95,6 +95,7 @@ def write_report(output_dir, completed_jobs_cpu=True, live_nodes_cpu=True):
 
 		jobs_all = jobs.get_jobs(state=state, starttime=starttime, endtime=endtime, filter=config.filter_whitespace_cpu_job)
 
+
 		
 		#--- cpu wasters
 		
@@ -110,26 +111,55 @@ def write_report(output_dir, completed_jobs_cpu=True, live_nodes_cpu=True):
 		for s in ('user', 'job', 'CPU days wasted', 'CPU efficiency', 'cores allocated', 'job script preview (click job link for full details)'):
 			html += '<th>%s</th>' % s
 		html += '</tr>'
-		
+	
 		#entries
+	
+		import Image
+		import ImageFont
+		import ImageDraw
+
 		for j in jobs_cpu_wasters:
 			html += '<tr>'
-			for i, x in enumerate((j['User'], j['JobID'], int(round(j['CPU_Wasted']/(60*60*24))), '%d%%' % int(round(j['CPU_Efficiency']*100)), j['NCPUS'], config.syntax_highlight(j['JobScriptPreview']))):
+			#for i, x in enumerate((j['User'], j['JobID'], int(round(j['CPU_Wasted']/(60*60*24))), '%d%%' % int(round(j['CPU_Efficiency']*100)), j['NCPUS'], config.syntax_highlight(j['JobScript']))):
+			for i, x in enumerate((j['User'], j['JobID'], int(round(j['CPU_Wasted']/(60*60*24))), '%d%%' % int(round(j['CPU_Efficiency']*100)), j['NCPUS'], j['JobID'])):
 				if i==1:
 					html += '<td><a href="jobs/%s.html">%s</a></td>' % (x, x)
 				elif i==2:
 					html += '<td style="text-align:right;"><strong>%s</strong></td>' % x
 				elif i in (3, 4):
 					html += '<td style="text-align:right;">%s</td>' % x
+				elif i==5:
+					html += '<td><img src=jobs/%s.png></td>' % x
 				else:
 					html += '<td>%s</td>' % x
 			html += '</tr>\n'
-
+			y_size = min( 42*18+40 ,len(j['JobScript'].splitlines())*18+40)
+			img = Image.new('RGB', (600, y_size), "white")
+			d = ImageDraw.Draw(img)
+			fontPath = "/usr/share/fonts/dejavu/DejaVuLGCSansMono.ttf"
+			fontSans12 =  ImageFont.truetype ( fontPath, 12 )
+			x_pos=20
+			y_pos=20
+			for line in j['JobScript'].splitlines():
+				if line.rfind("module") !=-1 or line.rfind("mpirun") != -1 or line.rfind("srun") !=-1 or line.rfind("mpiexec") !=-1:
+    					d.text( (x_pos,y_pos), line, font=fontSans12 , fill=(255, 0, 0) )
+				else:
+    					d.text( (x_pos,y_pos), line, font=fontSans12 , fill=(0, 0, 0) )
+				y_pos = y_pos + 18
+				if y_pos > y_size -20:
+					break
+			del d
+			try:
+				img.save(os.path.join(output_dir,"jobs/%s.png" % j['JobID']),'png')
+			except:
+				print "Unable to save image"
+		
 			with open(os.path.join(jobs_dirname, '%s.html' % j['JobID']), 'w') as f:
 				f.write(jobs.job_html_report(j))
 		
 		#wrap-up
 		html += '</table>'
+		#Generate images with script
 
 
 
@@ -190,6 +220,8 @@ def write_report(output_dir, completed_jobs_cpu=True, live_nodes_cpu=True):
 	
 	with open(os.path.join(output_dir,page_filename),'w') as f:
 		f.write(html)
+
+	print os.path.join(output_dir,page_filename)
 
 
 if __name__=='__main__':
