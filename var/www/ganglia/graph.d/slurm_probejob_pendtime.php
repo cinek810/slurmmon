@@ -14,7 +14,7 @@ function graph_slurm_probejob_pendtime ( &$rrdtool_graph ) {
                                 
         }
 
-        $colours=array("#00000f","#FF0000","#00FF00","#FFFF00","#0000FF");
+        $colours=array("#00000f","#FF0000","#00FF00","#FFFF00","#0000FF","#FFAA00","#FF00BB");
         $i=0;
         foreach ( $json_conf['probejob_partitions'] as $partition)
         {
